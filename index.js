@@ -1,7 +1,7 @@
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var PORT = process.env.PORT || 2000;
+
 //app.set("view engine", "ejs");
 
 app.get('/', function(req, res){
@@ -9,23 +9,21 @@ app.get('/', function(req, res){
 });
 var client=0;
 io.on('connection', function(socket){
-	client++;//console.log(client);
+	client++;console.log(client);
 	socket.on("send message", function(data){
 		io.sockets.emit("new message", data);
 	});
 	socket.on('disconnect', function(){
-		client--;//console.log(client);
+		client--;console.log(client);
 		var dat="One client dropped "+client+" Clients Connected...";
 		io.sockets.emit('new message', dat);
 	})
 });
 
-http.listen(process.env.PORT);
+http.listen(3000, function(){
+  console.log('listening at 3000...');
+});
 
-
-// , function(){
-//   console.log('listening at 3000...');
-// }
 // var express = require("express");
 // var app = express();
 // var io = require("socket.io")(socketio);
