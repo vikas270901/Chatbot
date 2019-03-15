@@ -1,0 +1,3 @@
+# Chatbot
+It is a simple chatting app, which could be used for broadcasting/communicating between two or more users.
+Target is to make a fully functional chat app...
