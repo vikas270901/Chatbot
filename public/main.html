@@ -2,32 +2,76 @@
 <html>
 <head>
 	<title>chat app</title>
+	<style>
+		.container{
+			display: none;
+		}
+	</style>
 	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
 	<script>
 		jQuery(function(){
+		var main_user='';
 		var socket = io.connect();
+		$("#authform").submit(function(e){
+		e.preventDefault();
+		main_user = $("#usename").val();
+		$("#uzer").html(main_user);
+		socket.emit('auth', $("#usename").val(), function(data){
+			if(data){
+				$(".user").hide();
+				$(".container").show();
+			}
+			else{$(".theMessage").html("Error, User Already Exists...")}
+		});
+	});
+		socket.on('user', function(data){
+			var allusers='';
+			for (var i = 0 ;i < data.length; i++) {
+				allusers += data[i]+"<br>"}
+			$("#allUsers").html(allusers);
+		});
+
 		$("#sendmessage").submit(function(d){
-			d.preventDefault();
-		socket.emit('send message', $("#message").val());
+		d.preventDefault();
+		socket.emit('send message',$("#message").val());
 			$("#message").val('');
 		});
-		socket.on("new message", function(data, err){
-			console.log(data);
-			$("#chat").append(data + "<br/>");
-	});
+		socket.on("new message", function(data){
+			if(main_user == data.name){$("#chat").append("<span style='float:right;background-color:#ffbfbf;padding:5px;border:0.2px solid red;border-radius:20px;'><span style='color:black;><b style='position absolute; margin-left:50px;'></b> "+data.data+"</span></span><br/><br/>");}
+			else{
+			$("#chat").append("<span style='color:black;background-color:#afffaa;padding:5px;border:0.2px solid green;border-radius:20px;'> <b style='color:black;'>"+data.name+":</b> "+data.data+"</span><br/><br/>");
+			}});
+		socket.on('message2', function(data){
+			$("#connectStatus").val('');
+			$("#connectStatus").html(data);
+		});
 });
 </script>
 </head>
 <body style="background-color: #dcdcdc">
-<div><center><h1>Chat App</h1><br>
-<div style="position:absolute;bottom:10px;border:0.2px solid black;height:89%;width:30%;color:red;background-color:white;margin-left:35%;"><br>
-<div style="position:absolute;bottom:10px;margin-left:25%;">
-<div id="chat"></div>
-<form id="sendmessage">
+<b style="color: black;" >User: </b><span id="uzer"></span>
+<div id="msgg"></div>
+<div class="user">
+<span class="theMessage"></span>
+	<form id="authform">
+		<input type="text" id="usename" placeholder="Username" required>
+		<input type="submit" value="Go to Chat">
+	</form>
+	<div id="onlineUsers"></div>
+</div>
+<div class="container" >
+<span style="position:absolute;padding:5px;overflow:hidden;height:500;width:100px;border:0.2px solid black;background-color:white;margin:50px;"><span style="margin:5px;"><b>Online Users</b>
+	<div style="padding:5px;margin:2px;background-color:#afffaa;" id="allUsers" ></div></span></span>
+<center>Status:<span id="connectStatus"></span><br><span><b>Chat App</b></span></center><br>
+<div style="overflow:hidden;position:absolute;bottom:10px;border:0.2px solid black;height:89%;width:30%;color:red;background-color:white;margin-left:35%;">
+	<br>
+<div>
+<div style="position: absolute;right: 0px;width: 95%; bottom:15px;padding: 10px;" id="chat"></div>
+<form style="position:absolute;bottom:10px;margin-left:25%;" id="sendmessage">
     <input id="message" required/>
     <input type="submit" id="send" value="Send" />
 </form>
-</div></div></center></div>
+</div></div></div>
 </body>
 </html>
